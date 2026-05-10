@@ -45,8 +45,9 @@ def load_insiders(insiders_file='answers/insiders.csv', dataset_filter=None):
     
     # Filter by dataset if specified
     if dataset_filter:
-        # `insiders.csv` 的 dataset 列可能被 pandas 读成 float（例如 4.2），
-        # 但 dataset_filter 通常是字符串（例如 "4.2"），直接比较会得到 0 记录。
+        # `insiders.csv`'s `dataset` column may be parsed by pandas as float (e.g. 4.2),
+        # while dataset_filter is usually a string (e.g. "4.2"). Direct comparison yields 0 rows;
+        # cast both sides to a stripped string before filtering.
         df = df.copy()
         df['dataset'] = df['dataset'].astype(str).str.strip()
         ds = str(dataset_filter).strip()
@@ -111,7 +112,8 @@ def is_malicious_record(user_id, record_time, malicious_users):
 def is_malicious_sequence(user_id, window_start, window_end, malicious_users):
     """
     Check if a (user, time window) overlaps any malicious period.
-    Used for sequence-level labeling: 若行为序列的时间段内包含恶意记录则标 1.
+    Used for sequence-level labeling: a sequence is labeled 1 if its time
+    range overlaps any malicious period for the same user.
 
     Parameters
     ----------
@@ -136,25 +138,27 @@ def is_malicious_sequence(user_id, window_start, window_end, malicious_users):
 def label_sequence_table(seq_df, insiders_path, dataset_filter='4.2',
                          user_col='file_user', window_date_col='file_date'):
     """
-    序列级打标：若某条序列（用户+时间窗口）的时间段与 answers 中该用户的恶意时间段有重叠，则标 1。
+    Sequence-level labeling: a sequence (user + time window) is labeled 1 if its
+    window overlaps any malicious period for the same user in `answers/insiders.csv`.
 
     Parameters
     ----------
     seq_df : pandas.DataFrame
-        序列表，必须含 user_col 与 window_date_col（每行一个用户一个窗口）。
+        Sequence table; must contain `user_col` and `window_date_col`
+        (one row per (user, window)).
     insiders_path : str
-        answers/insiders.csv 路径。
+        Path to `answers/insiders.csv`.
     dataset_filter : str
-        如 '4.2'。
+        Dataset name to filter on, e.g. '4.2'.
     user_col : str
-        用户名列，默认 'file_user'。
+        User-id column. Defaults to 'file_user'.
     window_date_col : str
-        窗口日期列（日期或 datetime），默认 'file_date'。
+        Window date column (date or datetime). Defaults to 'file_date'.
 
     Returns
     -------
     pandas.DataFrame
-        带 is_malicious, malicious_scenario 的副本。
+        Copy of `seq_df` with `is_malicious` and `malicious_scenario` columns added.
     """
     seq_df = seq_df.copy()
     if user_col not in seq_df.columns or window_date_col not in seq_df.columns:
@@ -411,7 +415,8 @@ def main():
     
     args = parser.parse_args()
     
-    # 序列级打标：对“用户+时间窗口”序列表打标（若窗口与恶意时间段重叠则标 1）
+    # Sequence-level labelling: label a (user, time window) sequence table
+    # (mark 1 when the window overlaps any malicious period for that user).
     if args.sequences:
         if not os.path.exists(args.sequences):
             print(f"Error: File not found {args.sequences}")

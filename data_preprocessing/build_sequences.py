@@ -224,13 +224,14 @@ def aggregate_by_window(logon_df, file_df, device_df, email_df, window='day'):
     for c in int_cols:
         if c in out.columns:
             out[c] = out[c].astype(int)
-    # Derived: 窗口内非工作时间登录占比
+    # Derived: ratio of after-hours logons within the window
     out['logon_after_hours_ratio'] = np.where(
         out['n_logon'] > 0,
         out['n_logon_after_hours'].astype(float) / out['n_logon'],
         0.0
     )
-    # 突发性特征：当前窗口与用户全局均值的比值，降低对单一强特征（如 is_terminated）的依赖
+    # Burstiness features: ratio of the current window to the user's long-term mean,
+    # reducing reliance on any single dominant feature (e.g. is_terminated).
     for col in ['n_logon', 'n_file', 'n_device_total', 'n_email']:
         if col not in out.columns:
             continue
@@ -280,7 +281,7 @@ def main():
         email_path,
         internal_domain_substr=args.internal_domain.strip().lower() if args.internal_domain else '',
     )
-    # 附件/大小异常：size 或 attachments 超过全局 95 分位数则记为异常
+    # Attachment/size anomaly: flag rows where `size` or `attachments` exceed the global 95th percentile.
     if 'size' in email_df.columns or 'attachments' in email_df.columns:
         sz = pd.to_numeric(email_df['size'], errors='coerce') if 'size' in email_df.columns else pd.Series(0, index=email_df.index)
         att = pd.to_numeric(email_df['attachments'], errors='coerce') if 'attachments' in email_df.columns else pd.Series(0, index=email_df.index)

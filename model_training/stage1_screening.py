@@ -373,7 +373,9 @@ def compare_models(results_dict):
 
 def run_5fold_user_evaluation(df, feature_cols, target_recall=0.99, random_state=42):
     """
-    5 折用户级交叉验证评估：每轮 4 组用户训练、1 组用户测试，轮换 5 次，汇报各折指标及均值±标准差。
+    5-fold user-level cross-validation: each fold trains on 4 user groups
+    and tests on the remaining 1, rotating five times; reports per-fold
+    metrics together with mean ± std.
     """
     exclude_cols = ['file_user', 'file_date', 'is_malicious', 'malicious_scenario']
     X = df[feature_cols].fillna(0).replace([np.inf, -np.inf], 0)
@@ -495,7 +497,8 @@ def main():
     add_interaction_features(df)
     exclude_cols = ['file_user', 'file_date', 'is_malicious', 'malicious_scenario']
     feature_cols = [c for c in df.columns if c not in exclude_cols]
-    # 5 折用户级评估：每折 4 组用户训练、1 组用户测试，汇报 5 折均值±标准差
+    # 5-fold user-level evaluation: each fold trains on 4 user groups and
+    # tests on the remaining 1; reports the 5-fold mean ± std.
     if args.eval_5fold:
         run_5fold_user_evaluation(df, feature_cols, target_recall=args.target_recall)
     
