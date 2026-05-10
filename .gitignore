@@ -1,0 +1,57 @@
+# =============================================================
+# Project-specific data & artifacts
+# =============================================================
+
+# CERT r4.2 raw dataset — NOT redistributed (ExactData/CMU SEI license)
+r4.2/
+answers/
+
+# Intermediate / labeled CSVs produced by data_preprocessing/
+features.csv
+integrated_logs.csv
+integrated_logs_labeled.csv
+integrated_sequences_labeled.csv
+data_preprocessing/ldap_user_summary.csv
+
+# Stage 1 / Stage 2 training & evaluation artifacts (regenerable)
+model_training/*.pkl
+model_training/*.jsonl
+model_training/stage2_narratives*.txt
+model_training/baseline_*.csv
+model_training/suspicious_sequences_*.csv
+model_training/model_comparison.csv
+model_training/cv5_evaluation_report.csv
+model_training/feature_importance_*.csv
+model_training/tfidf_eval_split.json
+model_training/stage2_fused_*.csv
+model_training/figures/*.png
+model_training/figures/*.csv
+
+# =============================================================
+# Python
+# =============================================================
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# =============================================================
+# Editors / OS
+# =============================================================
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# =============================================================
+# Secrets
+# =============================================================
+.env
+.env.*
+*.key
