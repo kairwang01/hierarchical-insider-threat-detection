@@ -1,19 +1,57 @@
-# 工具模块 (Utils)
+# Shared Utilities
 
-本文件夹包含辅助模块，供其他脚本使用。
+Helper modules imported by the data preprocessing and model training scripts.
 
-## 模块说明
+🌐 **Languages:** [English](#english) · [中文](#中文)
 
-- `ldap_helper.py` - LDAP数据处理辅助模块（供 `feature_engineering.py`、`stage2_narrative.py` 等使用）
+---
 
-## 使用方法
+<a id="english"></a>
 
-这些模块会被其他脚本自动导入，通常不需要直接运行。
+## English
 
-如果需要单独使用：
+### Modules
+
+| Module | Used by | Purpose |
+| --- | --- | --- |
+| `ldap_helper.py` | `feature_engineering.py`, `stage2_narrative.py` | Parse the CERT LDAP monthly snapshots and resolve a user's department / role at a given date |
+
+### Usage
+
+These modules are normally imported automatically by other scripts. If needed in isolation:
 
 ```python
 from ldap_helper import LDAPProcessor
-processor = LDAPProcessor('../r4.2/LDAP')
-user_info = processor.get_user_info('USER_ID', '2010-06')
+
+processor = LDAPProcessor("../r4.2/LDAP")
+user_info = processor.get_user_info("USER_ID", "2010-06")
+print(user_info["department"], user_info["role"])
 ```
+
+`LDAPProcessor` lazily loads each `LDAP/YYYY-MM.csv` snapshot on demand and caches it in memory.
+
+---
+
+<a id="中文"></a>
+
+## 中文
+
+### 模块
+
+| 模块 | 调用方 | 作用 |
+| --- | --- | --- |
+| `ldap_helper.py` | `feature_engineering.py`、`stage2_narrative.py` | 解析 CERT 的 LDAP 月度快照，按日期解析用户的部门 / 角色 |
+
+### 用法
+
+通常这些模块由其他脚本自动导入。如需单独使用：
+
+```python
+from ldap_helper import LDAPProcessor
+
+processor = LDAPProcessor("../r4.2/LDAP")
+user_info = processor.get_user_info("USER_ID", "2010-06")
+print(user_info["department"], user_info["role"])
+```
+
+`LDAPProcessor` 按需懒加载每份 `LDAP/YYYY-MM.csv` 快照并缓存到内存。
